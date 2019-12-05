@@ -17,8 +17,6 @@ almost the same), the way Controllers and Commands are defined, called and used,
 and the way we define services using Dependency Injection (yes, you can still
 use autowiring here...).
 
-## Previous concepts
-
 Before start digging into DriftPHP, is important to understand a little bit what
 concepts are you going to use, or even discover, in this package. Each topic is
 strongly related to the development of any application on top of DriftPHP, so
@@ -26,7 +24,7 @@ make sure you understand each one of them. In the future, all these topics will
 be packed into a new and important chapter of the documentation is being built
 at this moment.
 
-### Symfony Kernel
+## Symfony Kernel
 
 Have you ever thought what the Symfony Kernel is really about? In fact, we could
 say that is one of the most important elements of the whole Symfony ecosystem,
@@ -68,7 +66,7 @@ that, at least, could be possible, right?)
 We will change that.
 Keep reading.
 
-### HTTP Server
+## HTTP Server
 
 Now remember one of your Symfony projects. Remember about the Apache or Nginx
 configuration, then remember about the PHP-FPM, about how to link all together,
@@ -98,7 +96,7 @@ Can we solve this?
 Yes. We will solve this.
 Keep reading.
 
-### ReactPHP
+## ReactPHP
 
 Since some years ago, PHP turned a bit more interesting with the implementation
 of Promises from ReactPHP. The language is exactly the same, PHP, but the unique
@@ -126,7 +124,7 @@ Can we solve this?
 Again. Yes.
 Keep reading.
 
-## The framework
+## The Framework
 
 So, having 3 small problems in front of us, and with the big promise to solve
 this situation, here you have the two main packages that this framework offers
@@ -247,7 +245,7 @@ curl "127.0.0.1:8000"
 a distributed image. You have to open in your browser
 `http://127.0.0.1:8000/public/driftphp.png` and you should see our amazing logo.
 
-## Check our demo
+## Check the demo
 
 If you want a bit more experience with DriftPHP you might have a look at our
 distributed demo. We will update this demo in order to have as many built-in
@@ -476,7 +474,7 @@ php vendor/bin/server run 0.0.0.0:8100 --no-static-folder
 Set of simple PHP functions turned non-blocking on too of
 [ReactPHP](https://reactphp.org/)
 
-## Install
+## Installation
 
 The recommended way to install this library is [through Composer](https://getcomposer.org).
 [New to Composer?](https://getcomposer.org/doc/00-intro.md)
@@ -531,7 +529,10 @@ in order to make it run (block) until your conditions are fulfilled.
 $loop = React\EventLoop\Factory::create();
 ```
 
-### sleep
+> Under DriftPHP framework, you don't have to create a new EventLoop instance,
+> but inject the one you have already built, named `@drift.event_loop`.
+
+## sleep
 
 The `sleep($seconds, LoopInterface $loop)` method can be used to sleep for
 $time seconds.
@@ -556,7 +557,7 @@ feature.
 the program execution. This method returns a Promise that will be resolved after
 n seconds. This is a non-blocking feature.
 
-### usleep
+## usleep
 
 The `sleep($seconds, LoopInterface $loop)` method can be used to sleep for
 $time microseconds.
@@ -571,7 +572,7 @@ React\usleep(3000, $loop)
 The same rationale than the [`React\sleep`](#sleep) method. This is a
 non-blocking action.
 
-### mime_content_type
+## mime_content_type
 
 The `mime_content_type("/tmp/file.png", LoopInterface $loop)` method can be used
 to guess the mime content type of a file. If failure, then rejects with a
@@ -603,7 +604,7 @@ This is a simple adapter for Redis on top of ReactPHP and DriftPHP. Following
 the same structure that is followed in the Symfony ecosystem, you can use this
 package as a Bundle, only usable under DriftPHP Framework.
 
-### Install
+### Installation
 
 You can install the package by using composer
 
@@ -636,7 +637,7 @@ redis:
 
 Only host is required. All the other values are optional.
 
-### Use it
+### Usage
 
 Once you have your clients created, you can inject them in your services by
 using the name of the client in your dependency injection arguments array

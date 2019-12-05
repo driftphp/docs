@@ -1,4 +1,4 @@
-![logo](_media/driftphp.png)
+![logo](_media/driftphp-small.png)
 
 > *PHP Framework on top of Symfony and ReactPHP components*
 
