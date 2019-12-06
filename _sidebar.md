@@ -35,4 +35,9 @@
         * [Installation](/?#installation-3)
         * [Configure](/?#configure)
         * [Usage](/?#usage-2)
+        
+    * [Mysql Adapter](/?#mysql-adapter)
+        * [Installation](/?#installation-4)
+        * [Configure](/?#configure-1)
+        * [Usage](/?#usage-3)
     
