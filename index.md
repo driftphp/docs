@@ -1,3 +1,0 @@
-# DriftPHP
-
-> Documentation
