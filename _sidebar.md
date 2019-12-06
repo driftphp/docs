@@ -30,14 +30,13 @@
     * [usleep](/?#usleep)
     * [mime_content_type](/?#mime_content_type)
     
-* **Adapters**
-    * [Redis Adapter](/?#redis-adapter)
-        * [Installation](/?#installation-3)
-        * [Configure](/?#configure)
-        * [Usage](/?#usage-2)
-        
-    * [Mysql Adapter](/?#mysql-adapter)
-        * [Installation](/?#installation-4)
-        * [Configure](/?#configure-1)
-        * [Usage](/?#usage-3)
+* **Redis Adapter**
+    * [Installation](/?#redis-adapter)
+    * [Configure](/?#configure)
+    * [Usage](/?#usage-2)
+    
+* **Mysql Adapter**
+    * [Installation](/?#mysql-adapter)
+    * [Configure](/?#configure-1)
+    * [Usage](/?#usage-3)
     
