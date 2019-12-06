@@ -277,6 +277,9 @@ this repository will not change your original project behavior.
 }
 ```
 
+You can get the [source code](https://github.com/driftphp/http-kernel) from 
+Github.
+
 Once you have the package under your vendor folder, now it's time to turn you
 application asynchronous-friendly by changing your kernel implementation, from
 the Symfony regular HTTP Kernel class, to the new Async one.
@@ -391,6 +394,9 @@ Once updated your dependencies, you will find a brand new server bin inside the
 }
 ```
 
+You can get the [source code](https://github.com/driftphp/server) from 
+Github.
+
 ## Usage
 
 This is a PHP file. This means that the way of starting this server is by, just,
@@ -476,14 +482,11 @@ Set of simple PHP functions turned non-blocking on too of
 
 ## Installation
 
-The recommended way to install this library is [through Composer](https://getcomposer.org).
-[New to Composer?](https://getcomposer.org/doc/00-intro.md)
-
-This project follows [SemVer](https://semver.org/).
-This will install the latest supported version:
+You can install the package by using composer, or getting the 
+[source code](https://github.com/driftphp/reactphp-functions) from Github.
 
 ```bash
-$ composer require driftphp/react-functions:dev-master
+composer require drift/react-functions
 ```
 
 ## Quickstart example
@@ -606,7 +609,8 @@ package as a Bundle, only usable under DriftPHP Framework.
 
 ### Installation
 
-You can install the package by using composer
+You can install the package by using composer, or getting the 
+[source code](https://github.com/driftphp/redis-adapter) from Github.
 
 ```bash
 composer require drift/redis-bundle
@@ -672,7 +676,8 @@ package as a Bundle, only usable under DriftPHP Framework.
 
 ### Installation
 
-You can install the package by using composer
+You can install the package by using composer, or getting the 
+[source code](https://github.com/driftphp/mysql-adapter) from Github.
 
 ```bash
 composer require drift/mysql-bundle
