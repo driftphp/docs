@@ -654,8 +654,77 @@ You can use Autowiring as well in the bundle, by using the name of the client
 and using it as a named parameter
 
 ```php
+use Clue\React\Redis\Client;
+
 public function __construct(
     Client $usersClient,
     Client $ordersClient
+)
+```
+
+## Mysql adapter
+
+[![CircleCI](https://circleci.com/gh/driftphp/mysql-bundle.svg?style=svg)](https://circleci.com/gh/driftphp/mysql-bundle)
+
+This is a simple adapter for Mysql on top of ReactPHP and DriftPHP. Following
+the same structure that is followed in the Symfony ecosystem, you can use this
+package as a Bundle, only usable under DriftPHP Framework.
+
+### Installation
+
+You can install the package by using composer
+
+```bash
+composer require drift/mysql-bundle
+```
+
+### Configure
+
+This package will allow you to configure all your Mysql async clients, taking
+care of duplicity and the loop integration. Once your package is required by
+composer, add the bundle in the kernel and change your `services.yaml`
+configuration file to defined the connections
+
+```yaml
+mysql:
+    connections:
+        users:
+            host: "127.0.0.1"
+            port: 3306
+            user: "root"
+            password: "root"
+            database: "users"
+        orders:
+            host: "127.0.0.1"
+            user: "root"
+            password: "root"
+            database: "orders"
+```
+
+All parameters are required, but the port. This one is `3306` by default.
+
+### Usage
+
+Once you have your connections created, you can inject them in your services by
+using the name of the connection in your dependency injection arguments array
+
+```yaml
+a_service:
+    class: My\Service
+    arguments:
+        - "@mysql.users_connection"
+        - "@mysql.orders_connection"
+```
+
+You can use Autowiring as well in the bundle, by using the name of the 
+connection and using it as a named parameter
+
+```php
+use React\MySQL\ConnectionInterface;
+use React\MySQL\Io\LazyConnection;
+
+public function __construct(
+    ConnectionInterface $usersConnection,
+    LazyConnection $ordersConnection
 )
 ```
