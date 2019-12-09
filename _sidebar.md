@@ -8,6 +8,10 @@
     * [Install the Skeleton](/?#getting-started)
     * [Start the server](/?#start-the-server)
     * [Test the endpoints](/?#test-the-endpoints)
+    * [Built-in Services](/?#built-in-services)
+        * [EventLoop](/?#eventloop)
+        * [Filesystem](/?#filesystem)
+    * [Creating a controller](/?#creating-a-controller)
     * [Check our demo](/?#check-the-demo)
     
 * **The HTTP Kernel**
@@ -39,4 +43,9 @@
     * [Installation](/?#mysql-adapter)
     * [Configure](/?#configure-1)
     * [Usage](/?#usage-3)
+    
+* **Twig Adapter**
+    * [Installation](/?#twig-adapter)
+    * [Configure](/?#configure-2)
+    * [Usage](/?#usage-4)
     

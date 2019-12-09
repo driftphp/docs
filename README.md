@@ -227,8 +227,8 @@ php vendor/bin/server watch 0.0.0.0:8000 --dev --debug
 
 ## Test the endpoints
 
-> You can test a couple of endpoints already built-in in this skeleton. Make sure
-> to delete the endpoint before working on a real life project.
+> You can test a couple of endpoints already built-in in this skeleton. Make 
+> sure to delete the endpoint before working on a real life project.
 
 Once you have the server connected to a websocket, it's time to check some
 endpoints and see if this is already working.
@@ -244,6 +244,169 @@ curl "127.0.0.1:8000"
 ... or you can test how static content server works by opening in your browser
 a distributed image. You have to open in your browser
 `http://127.0.0.1:8000/public/driftphp.png` and you should see our amazing logo.
+
+## Events
+
+DriftPHP uses the same kernel events that Symfony does. You can check a bit more
+information about them in 
+[Built-in Symfony Events](https://symfony.com/doc/current/reference/events.html).
+DriftPHP introduces a new kernel event called `kernel.preload`, and dispatched
+once the Kernel is booted. This event is dispatched only once and must be used
+only for preloading content before the first request is handled.
+
+```php
+use Drift\HttpKernel\Event\PreloadEvent;
+
+/**
+ * @param PreloadEvent $event
+ */
+public function onKernelPreload(PreloadEvent $event)
+{
+    // ...
+}
+```
+
+On the other hand, the event `kernel.terminate` is never triggered, as the
+kernel is never terminated.
+
+Here you have the list of used events in DriftPHP kernel.
+
+- kernel.preload
+- kernel.request
+- kernel.controller
+- kernel.controller_arguments
+- kernel.view
+- kernel.response
+- kernel.finish_request
+- kernel.exception
+
+## Built-in services
+
+In DriftPHP you can find some already built-in services, ready to be injected
+and used in your services. They are all mostly related to the EventLoop
+(remember that you can work only with one running EventLoop, and this one is
+already created for the server itself).
+
+### EventLoop
+
+You can use the EventLoop in your services by injecting it, even using
+autowiring.
+
+```php
+public function __construct(LoopInterface $loop)
+{
+    $this->>loop = $loop;
+}
+```
+
+You can access to the loop in the container by using this service name
+
+- drift.event_loop
+
+### Filesystem
+
+DriftPHP have created for you a Filesystem instance. Use this object to make all
+disk requests, like reading from a file or writing a new one. Do **not** use the
+regular PHP methods or your server will experiment a serious lack of performance
+due to blocking operations.
+
+You can read a bit more about this package at
+[ReactPHP Filesystem](https://github.com/reactphp/filesystem)
+
+```php
+use React\Filesystem\Filesystem;
+
+public function __construct(Filesystem $filesystem)
+{
+    $this->>filesystem = $filesystem;
+}
+```
+
+You can access to the loop in the container by using this service name
+
+- drift.filesystem
+
+## Creating a Controller
+
+This is the easiest part of all. You can create controllers the same way you've
+done until now, but the **only** difference is that, hereinafter, you won't
+return Response instances, but Promises that, once resolved, will return a
+Response object.
+
+Let's take a look at `GetValueController` code of our demo. This is the response
+code for the controller called method. This Redis client is asynchronous, so
+each time you call any method, for example `->get($key)` you won't get a value,
+but a promise. 
+
+```php
+namespace App\Controller;
+
+use App\Redis\RedisWrapper;
+use React\Promise\PromiseInterface;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
+
+/**
+ * Class GetValueController
+ */
+class GetValueController
+{
+    /**
+     * @var RedisWrapper
+     *
+     * Redis Wrapper
+     */
+    private $redisWrapper;
+
+    /**
+     * PutValueController constructor.
+     *
+     * @param RedisWrapper $redisWrapper
+     */
+    public function __construct(RedisWrapper $redisWrapper)
+    {
+        $this->redisWrapper = $redisWrapper;
+    }
+
+    /**
+     * Invoke
+     *
+     * @param Request $request
+     *
+     * @return PromiseInterface
+     */
+    public function __invoke(Request $request)
+    {
+        $key = $request
+            ->attributes
+            ->get('key');
+
+        return $this
+            ->redisWrapper
+            ->getClient()
+            ->get($key)
+            ->then(function($value) use ($key) {
+                return new JsonResponse(
+                    [
+                        'key' => $key,
+                        'value' => is_string($value)
+                            ? $value
+                            : null,
+                    ],
+                    200
+                );
+            });
+    }
+}
+```
+
+When the promise is resolved, the `then` method is called with the given result
+as a unique parameter. Once we have this value, we return a `JsonResponse`
+instance inside the callback.
+
+And because a `->then()` method returns a new Promise, and we're returning
+directly this value, the kernel receives a Promise and not a value. And that's
+it. The server should take care of the rest
 
 ## Check the demo
 
@@ -610,7 +773,7 @@ package as a Bundle, only usable under DriftPHP Framework.
 ### Installation
 
 You can install the package by using composer, or getting the 
-[source code](https://github.com/driftphp/redis-adapter) from Github.
+[source code](https://github.com/driftphp/redis-bundle) from Github.
 
 ```bash
 composer require drift/redis-bundle
@@ -677,7 +840,7 @@ package as a Bundle, only usable under DriftPHP Framework.
 ### Installation
 
 You can install the package by using composer, or getting the 
-[source code](https://github.com/driftphp/mysql-adapter) from Github.
+[source code](https://github.com/driftphp/mysql-bundle) from Github.
 
 ```bash
 composer require drift/mysql-bundle
@@ -732,4 +895,158 @@ public function __construct(
     ConnectionInterface $usersConnection,
     LazyConnection $ordersConnection
 )
+```
+
+## Twig adapter
+
+[![CircleCI](https://circleci.com/gh/driftphp/twig-bundle.svg?style=svg)](https://circleci.com/gh/driftphp/twig-bundle)
+
+This is a simple adapter for Twig on top of ReactPHP and DriftPHP. Following
+the same structure that is followed in the Symfony ecosystem, you can use this
+package as a Bundle, only usable under DriftPHP Framework.
+
+This package will work for you as a simple bridge between your DriftPHP and Twig
+as a templating engine. Of course, the behavior will be exactly the same than
+working on top of other frameworks, like Symfony, but some small changes have
+been introduced here in order to be non-blocking.
+
+### Installation
+
+You can install the package by using composer, or getting the 
+[source code](https://github.com/driftphp/twig-bundle) from Github.
+
+```bash
+composer require drift/twig-bundle
+```
+
+### Usage
+
+You have two different ways of using Twig in DriftPHP. Both ways are pretty
+similar, but could be discussed about the grade of coupling that we want between
+our layers.
+
+The first one is the regular one. We can inject Twig as a dependency, and having
+the path of our template, we can easily render our view. You can check here a
+small example about this strategy. As you can see, your controller turns
+dependent on a view reference and on the complete Twig engine, which can make
+sense somehow.
+
+```php
+/**
+ * Class ViewValuesController
+ */
+class ViewValuesController
+{
+    private $twig;
+
+    /**
+     * PutValueController constructor.
+     *
+     * @param Environment $twig
+     */
+    public function __construct(Environment $twig)
+    {
+        $this->twig = $twig;
+    }
+
+    /**
+     * Invoke
+     *
+     * @param Request $request
+     *
+     * @return PromiseInterface
+     */
+    public function __invoke(Request $request)
+    {
+        $template = $this
+            ->twig
+            ->load('redis/view_values.twig');
+
+        return new Response(
+            $template->render([
+                'values' => $values
+            ]),
+            200
+    }
+}
+```
+
+On the other hand, you can make your controller **only** a Twig coupled part by
+implementing a small interface, which will force you defining this template path
+without having to inject the Environment. In that case, you can return an array
+and the bundle will render properly the template.
+
+```php
+use Drift\Twig\Controller\RenderableController;
+
+/**
+ * Class ViewValueController
+ */
+class ViewValueController implements RenderableController
+{
+    /**
+     * Invoke
+     *
+     * @param Request $request
+     *
+     * @return array
+     */
+    public function __invoke(Request $request) : array
+    {
+        return [
+            'key' => 'value'
+        ];
+    }
+
+    /**
+     * Get render template
+     *
+     * @return string
+     */
+    public static function getTemplatePath(): string
+    {
+        return 'redis/view_value.twig';
+    }
+}
+```
+
+If you follow that strategy, then you will be able to return promises instead of
+simple values. In that case, the bundle will wait until all promises are
+properly fulfilled and will render the template.
+
+```php
+use Drift\Twig\Controller\RenderableController;
+
+/**
+ * Class ViewValueController
+ */
+class ViewValueController implements RenderableController
+{
+    /**
+     * Invoke
+     *
+     * @param Request $request
+     *
+     * @return array
+     */
+    public function __invoke(Request $request) : array
+    {
+        return [
+            'key' => (new FulfilledPromise())
+                ->then(function() {
+                    return 'value';
+                });
+        ];
+    }
+
+    /**
+     * Get render template
+     *
+     * @return string
+     */
+    public static function getTemplatePath(): string
+    {
+        return 'redis/view_value.twig';
+    }
+}
 ```
