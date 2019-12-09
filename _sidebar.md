@@ -29,7 +29,7 @@
     * [Installation](/?#installation-2)
     * [Quickstart example](/?#quickstart-example)
     * [Usage](/?#usage-1)
-    * [EventLoop](/?#eventloop)
+    * [EventLoop](/?#eventloop-1)
     * [sleep](/?#sleep)
     * [usleep](/?#usleep)
     * [mime_content_type](/?#mime_content_type)
