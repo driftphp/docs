@@ -295,7 +295,7 @@ autowiring.
 ```php
 public function __construct(LoopInterface $loop)
 {
-    $this->>loop = $loop;
+    $this->loop = $loop;
 }
 ```
 
@@ -318,7 +318,7 @@ use React\Filesystem\Filesystem;
 
 public function __construct(Filesystem $filesystem)
 {
-    $this->>filesystem = $filesystem;
+    $this->filesystem = $filesystem;
 }
 ```
 
@@ -954,19 +954,21 @@ class ViewValuesController
      *
      * @param Request $request
      *
-     * @return PromiseInterface
+     * @return Response
      */
     public function __invoke(Request $request)
     {
         $template = $this
             ->twig
             ->load('redis/view_values.twig');
+        $values = ['drift', 'php'];
 
         return new Response(
             $template->render([
                 'values' => $values
             ]),
             200
+        );
     }
 }
 ```
@@ -1035,7 +1037,7 @@ class ViewValueController implements RenderableController
             'key' => (new FulfilledPromise())
                 ->then(function() {
                     return 'value';
-                });
+                })
         ];
     }
 
