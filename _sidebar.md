@@ -15,18 +15,27 @@
     * [Check our demo](/?#check-the-demo)
     
 * **The HTTP Kernel**
-    * [Installation](/?#installation)
+    * [Installation](/?#the-http-kernel)
     * [Controllers](/?#controllers)
     * [Event Dispatcher](/?#event-dispatcher)
     
 * **The Server**
-    * [Installation](/?#installation-1)
+    * [Installation](/?#the-server)
     * [Usage](/?#usage)
     * [Watcher](/?#watcher)
     * [Serving static files](/?#serving-static-files)
     
+* **The Command Bus**
+    * [Installation](/?#the-command-bus)
+    * [Query Bus](/?#query-bus)
+    * [Command Bus](/?#command-bus)
+    * [Inline Command Bus](/?#inline-command-bus)
+    * [Middleware](/?#middleware)
+    * [Asynchronous Bus](/?#asynchronous-bus)
+    * [Command Consumer](/?#command-consumer)
+    
 * **ReactPHP functions**
-    * [Installation](/?#installation-2)
+    * [Installation](/?#reactphp-functions)
     * [Quickstart example](/?#quickstart-example)
     * [Usage](/?#usage-1)
     * [EventLoop](/?#eventloop-1)
@@ -44,8 +53,12 @@
     * [Configure](/?#configure-1)
     * [Usage](/?#usage-3)
     
-* **Twig Adapter**
-    * [Installation](/?#twig-adapter)
+* **AMQP Adapter**
+    * [Installation](/?#amqp-adapter)
     * [Configure](/?#configure-2)
     * [Usage](/?#usage-4)
+    
+* **Twig Adapter**
+    * [Installation](/?#twig-adapter)
+    * [Usage](/?#usage-5)
     
