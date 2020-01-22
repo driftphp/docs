@@ -1953,7 +1953,7 @@ one. If you have many of them, the first one will be the used one. You can
 change this behavior and specifically select which one you want to use by
 setting it in configuration.
 
-```yamljoder
+```yaml
 command_bus:
     command_bus:
         async_adapter:
