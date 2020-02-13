@@ -897,6 +897,72 @@ public function __construct(
 )
 ```
 
+## PostgreSQL adapter
+
+[![CircleCI](https://circleci.com/gh/driftphp/postgresql-bundle.svg?style=svg)](https://circleci.com/gh/driftphp/postgresql-bundle)
+
+This is a simple adapter for PostgreSQL on top of ReactPHP and DriftPHP. Following
+the same structure that is followed in the Symfony ecosystem, you can use this
+package as a Bundle, only usable under DriftPHP Framework.
+
+### Installation
+
+You can install the package by using composer, or getting the 
+[source code](https://github.com/driftphp/postgresql-bundle) from Github.
+
+```bash
+composer require drift/postgresql-bundle
+```
+
+### Configure
+
+This package will allow you to configure all your PostgreSQL async clients, taking
+care of duplicity and the loop integration. Once your package is required by
+composer, add the bundle in the kernel and change your `services.yaml`
+configuration file to defined the connections
+
+```yaml
+postgresql:
+    connections:
+        users:
+            host: "127.0.0.1"
+            port: 5432
+            user: "root"
+            password: "root"
+            database: "users"
+        orders:
+            host: "127.0.0.1"
+            user: "root"
+            password: "root"
+            database: "orders"
+```
+
+All parameters are required, but the port. This one is `5432` by default.
+
+### Usage
+
+Once you have your clients created, you can inject them in your services by
+using the name of the connection in your dependency injection arguments array
+
+```yaml
+a_service:
+    class: My\Service
+    arguments:
+        - "@postgresql.users_client"
+        - "@postgresql.orders_client"
+```
+
+You can use Autowiring as well in the bundle, by using the name of the 
+connection and using it as a named parameter
+
+```php
+use PgAsync\Client;
+
+public function __construct(Client $client)
+```
+
+Under the hood the bundle is a wrapper on top of [voryx/PgAsync](https://github.com/voryx/PgAsync) library. The detailed information about class `Client` you can find on the underlying library web-page.
+
 ## Twig adapter
 
 [![CircleCI](https://circleci.com/gh/driftphp/twig-bundle.svg?style=svg)](https://circleci.com/gh/driftphp/twig-bundle)

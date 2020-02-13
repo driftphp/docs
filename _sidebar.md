@@ -53,10 +53,15 @@
     * [Configure](/?#configure-1)
     * [Usage](/?#usage-3)
     
-* **AMQP Adapter**
-    * [Installation](/?#amqp-adapter)
+* **PostgreSQL Adapter**
+    * [Installation](/?#postgresql-adapter)
     * [Configure](/?#configure-2)
     * [Usage](/?#usage-4)
+
+* **AMQP Adapter**
+    * [Installation](/?#amqp-adapter)
+    * [Configure](/?#configure-3)
+    * [Usage](/?#usage-5)
     
 * **Twig Adapter**
     * [Installation](/?#twig-adapter)
