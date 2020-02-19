@@ -829,6 +829,8 @@ public function __construct(
 )
 ```
 
+Under the hood the bundle is a wrapper on top of [clue/reactphp-redis](https://github.com/clue/reactphp-redis) library. More detailed information on `Clue\React\Redis\Cliente` class you can find on the underlying library web-page.
+
 ## Mysql adapter
 
 [![CircleCI](https://circleci.com/gh/driftphp/mysql-bundle.svg?style=svg)](https://circleci.com/gh/driftphp/mysql-bundle)
@@ -897,6 +899,8 @@ public function __construct(
 )
 ```
 
+Under the hood the bundle is a wrapper on top of [friends-of-reactphp/mysql](https://github.com/friends-of-reactphp/mysql) library. More detailed information on `ConnectionInterface` and `LazyConnection` classes you can find on the underlying library web-page.
+
 ## PostgreSQL adapter
 
 [![CircleCI](https://circleci.com/gh/driftphp/postgresql-bundle.svg?style=svg)](https://circleci.com/gh/driftphp/postgresql-bundle)
@@ -961,7 +965,7 @@ use PgAsync\Client;
 public function __construct(Client $client)
 ```
 
-Under the hood the bundle is a wrapper on top of [voryx/PgAsync](https://github.com/voryx/PgAsync) library. The detailed information about class `Client` you can find on the underlying library web-page.
+Under the hood the bundle is a wrapper on top of [voryx/PgAsync](https://github.com/voryx/PgAsync) library. The detailed information on class `Client` you can find on the underlying library web-page.
 
 ## Twig adapter
 
