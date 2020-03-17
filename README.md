@@ -636,6 +636,317 @@ value, for example, for an API.
 php vendor/bin/server run 0.0.0.0:8100 --no-static-folder
 ```
 
+# The Command Bus
+
+[![CircleCI](https://circleci.com/gh/driftphp/command-bus-bundle.svg?style=svg)](https://circleci.com/gh/driftphp/command-bus-bundle)
+
+DriftPHP is a performance-oriented framework on top of PHP. This means that we,
+as a project, encourage you to take care of the architecture of all our
+implementations. Not only on terms of returning times, but on terms of
+scalability as well.
+
+One of the DriftPHP components brings you the opportunity to work on top of CQRS
+pattern, using Commands and Queries, some command buses and an already built-in
+async adapters with different implementations.
+
+## Installation
+
+You can install the package by using composer, or getting the 
+[source code](https://github.com/driftphp/command-bus-bundle) from Github.
+
+```bash
+composer require drift/command-bus
+```
+
+Once the package is properly loaded, make sure the bundle is loaded for all the
+environments. You should add the bundle in `Drift/config/bundles.php`.
+
+```php
+return [
+    //
+    Drift\CommandBus\CommandBusBundle::class => ['all' => true],
+    //
+];
+```
+
+Once the bundle is loaded in the kernel, you'll be able to use 3 different
+buses, each one of them with an specific purpose.
+
+- [QueryBus](#query-bus)
+- [CommandBus](#command-bus)
+- [InlineCommandBus](#inline-command-bus)
+
+## Query Bus
+
+Use this bus for asking queries. Remember that in the CQRS pattern, queries
+should never change the state of the persistence layer and should return a value
+or a Domain exception.
+
+```php
+use Drift\CommandBus\Bus\QueryBus;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+public function __execute(Request $request) {
+    /* @var QueryBus $queryBus */
+    return $queryBus
+        ->ask(new GetSomething())
+        ->then(function($something) {
+        
+            return new Response($something, 200);
+        });
+}
+```
+
+You can use *autowiring* for the QueryBus injection or you can manually inject
+the bus by using it's service name `drift.query_bus`
+
+```yaml
+My\Service:
+    arguments:
+      - "@drift.query_bus"
+```
+
+You can add handlers to this bus by defining them with the tag `query_handler`.
+Remember that you can define them all in bulk by using *autowiring* and setting
+this tag just one time.
+
+```yaml
+Domain\QueryHandler\:
+    resource: "../../src/Domain/QueryHandler"
+    tags: ['query_handler']
+```
+
+## Command Bus
+
+Use this bus for making changes to the persistence layer. In this case, CQRS
+pattern tells that Commands do **NOT** return any value, and if you return a
+Domain exception, this one should not be related to the persistence layer.
+
+```php
+use Drift\CommandBus\Bus\CommandBus;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+public function __execute(Request $request) {
+    /* @var CommandBus $commandBus */
+    return $commandBus
+        ->execute(new DoSomething())
+        ->then(function() {
+        
+            return new Response('OK', 202);
+        });
+}
+```
+
+You can use *autowiring* for the CommandBus injection or you can manually inject
+the bus by using it's service name `drift.command_bus`
+
+```yaml
+My\Service:
+    arguments:
+      - "@drift.command_bus"
+```
+
+You can add handlers to this bus by defining them with the tag `command_handler`.
+Remember that you can define them all in bulk by using *autowiring* and setting
+this tag just one time.
+
+```yaml
+Domain\CommandHandler\:
+    resource: "../../src/Domain/CommandHandler"
+    tags: ['command_handler']
+```
+
+This bus can be configured as async. That means that all your commands will be
+extracted from the bus at the point you chose and enqueued somewhere. You'll be
+able to consume these commands with a consumer in a non-blocking way.
+
+## Inline Command Bus
+
+This bus will contain exactly the same handlers and middlewares than the last
+one, but in this case, the async middleware will not be included never. Use this
+bus for commands that you'd never like to be removed from the bus and enqueued
+for asynchronous consumption.
+
+```php
+use Drift\CommandBus\Bus\InlineCommandBus;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+public function __execute(Request $request) {
+    /* @var InlineCommandBus $inlineCommandBus */
+    return $inlineCommandBus
+        ->execute(new DoSomething())
+        ->then(function() {
+        
+            return new Response('OK', 202);
+        });
+}
+```
+
+You can use *autowiring* for the InlineCommandBus injection or you can manually
+inject the bus by using it's service name `drift.inline_command_bus`
+
+```yaml
+My\Service:
+    arguments:
+      - "@drift.inline_command_bus"
+```
+
+## Middleware
+
+All these buses can have middleware classes defined in your application or
+domain layer. Middleware classes are just simple PHP classes with one public
+method. In DriftPHP, unlike other bus implementations, the middleware will be
+able to be part of your domain, so implementing an external interface will not
+be a thing.
+
+- Where is the contract then? you might ask...
+
+Well, is true that a contract should exist between the bus and your domain, and
+the configuration should know what method should be called as soon as is
+required.
+
+Well. In DriftPHP you just configure the name of the service and the name of the
+method to be called, and if the Middleware is not properly configured, then an
+Exception will be thrown during the Kernel build stage.
+
+Let's see how you can append middleware services in your buses.
+
+```yaml
+command_bus:
+    query_bus:
+        middlewares:
+          - middleware1.service
+          - Another\Service
+    command_bus:
+        middlewares:
+          - middleware1.service
+          - Another\Service
+```
+
+Remember that both the CommandBus and the InlineCommandBus will share all
+configuration.
+
+## Asynchronous Bus
+
+By default, the CommandBus asynchronous property is completely disabled. You can
+enable it by choosing one of the proposed implementations. All of them are
+implemented using the *Producer/Consumer* pattern.
+
+- Redis : In order to use this implementation, you will have to require and
+configure `drift/redis-bundle` package as is described at
+[Redis Adapter](#redis-adapter)
+
+In this example, we create a redis client named `queues` that will connect to
+localhost. Then we define that our command bus will be asynchronous and will
+use this given redis client to use it as a queue system, using the `commands`
+redis key.
+
+```yaml
+redis:
+    clients:
+        queues:
+            host: 127.0.0.1
+command_bus:
+    command_bus:
+        async_adapter:
+            redis:
+                client: queues
+                key: comamnds
+```
+
+- AMQP (RabbitMQ) : In order to use this implementation, you will have to require
+and configure `drift/amqp-bundle` package as is described at
+[AMQP Adapter](#amqp-adapter)
+
+In this example, we create an amqp client named `queues` that will connect to
+localhost. Then we define that our command bus will be asynchronous and will
+use this given amqp client to use it as a queue system, using the `commands`
+amqp queue.
+
+```yaml
+amqp:
+    connections:
+        queues:
+            host: 127.0.0.1
+command_bus:
+    command_bus:
+        async_adapter:
+            redis:
+                connection: queues
+                queue: comamnds
+```
+
+- InMemory : You can use this adapter only for testing purposes. Commands are
+appended in an internal array, and can be consulted during the testing case. You
+can retrieve the adapter by getting the service 
+`Drift\CommandBus\Async\InMemoryAdapter` defined as public by default.
+
+```yaml
+command_bus:
+    command_bus:
+        async_adapter:
+            in_memory:
+```
+
+By default, if you only have one strategy defined, this one will be the chosen
+one. If you have many of them, the first one will be the used one. You can
+change this behavior and specifically select which one you want to use by
+setting it in configuration.
+
+```yaml
+command_bus:
+    command_bus:
+        async_adapter:
+            adapter: redis
+            in_memory:
+            redis:
+                connection: queues
+                queue: comamnds
+```
+
+By default, the async adapter will be prepended in the beginning of the bus. You
+can change where you want to add this middleware by hand in the middleware list
+in configuration
+
+```yaml
+command_bus:
+    command_bus:
+        middlewares:
+          - middleware1.service
+          - @async
+          - Another\Service
+```
+
+In this case, the first `middleware1.service` middleware will be executed before
+the command is extracted from the bus, and will be executed too once the command
+is consumed asynchronously eventually.
+
+> You might have the option of choosing what commands should be executed
+> asynchronously and what commands should be executed inline. Well, this chose
+> should be done in the application layer (Controllers, Commands), so make sure
+> you inject CommandBus or InlineCommandBus depending on that needs.
+>
+## Command Consumer
+
+If we have used an async adapter for enqueue all (or just some) commands, then
+we should have a mechanism where to consume these commands. And good new are
+that this bundle already have this consumer available and ready to use.
+
+As consumed commands shouldn't be enqueued again unless something bad happens,
+instead of using CommandBus we will use InlineCommandBus (remember, same 
+configuration and async disabled).
+
+To start consuming commands, just use console command. In order to take care
+about memory consumption, you can make this consumer valid only during *n*
+iterations. After these iterations, the consumer will die. Only valid if you
+have a supervisor behind or similar, checking the number of instances running.
+
+```bash
+php bin/console bus:consume-commands --limit 10
+```
+
+By default, no limit.
+
 # ReactPHP functions
 
 [![CircleCI](https://circleci.com/gh/driftphp/reactphp-functions.svg?style=svg)](https://circleci.com/gh/driftphp/reactphp-functions)
