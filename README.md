@@ -822,7 +822,7 @@ class DoSomething
 
 }
 ```
-###The Command Handler
+### The Command Handler
 ```php
 namespace Domain\CommandHandler;
 
