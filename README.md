@@ -729,7 +729,7 @@ class GetSomething
 
 }
 ```
-###The Query Handler
+### The Query Handler
 ```php
 namespace Domain\QueryHandler;
 
