@@ -793,7 +793,7 @@ class DoSomethingController
     public function __invoke(string $uid) {
 
         return $this->queryBus
-            ->ask(new DoSomething($uid))
+            ->execute(new DoSomething($uid))
             ->then(function($something) {
             
                 return new Response($something, 200);
