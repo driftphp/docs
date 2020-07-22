@@ -670,7 +670,7 @@ return [
 ```
 
 Once the bundle is loaded in the kernel, you'll be able to use 3 different
-buses, each one of them with an specific purpose.
+buses, each one of them with a specific purpose.
 
 - [QueryBus](#query-bus)
 - [CommandBus](#command-bus)
@@ -681,19 +681,69 @@ buses, each one of them with an specific purpose.
 Use this bus for asking queries. Remember that in the CQRS pattern, queries
 should never change the state of the persistence layer and should return a value
 or a Domain exception.
-
+### The Controller
 ```php
+use Domain\Query\GetSomething;
 use Drift\CommandBus\Bus\QueryBus;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-public function __execute(Request $request) {
+
+class GetSomethingController 
+{
     /* @var QueryBus $queryBus */
-    return $queryBus
-        ->ask(new GetSomething())
-        ->then(function($something) {
-        
-            return new Response($something, 200);
-        });
+    private $queryBus;
+
+    public function __construct(QueryBus $queryBus)
+    {
+        $this->queryBus = $queryBus;
+    }
+
+    public function __invoke(string $uid) {
+
+        return $this->queryBus
+            ->ask(new GetSomething($uid))
+            ->then(function($something) {
+            
+                return new Response($something, 200);
+            });
+    }
+
+}
+```
+### The Query
+```php
+namespace Domain\Query;
+
+class GetSomething
+{
+    private $uid;
+
+    public function __construct(string $uid)
+    {
+        $this->uid = $uid;
+    }
+
+    public function getUid(): string
+    {
+        return $this->uid;
+    }
+
+}
+```
+###The Query Handler
+```php
+namespace Domain\QueryHandler;
+
+use Domain\Query\GetSomething;
+
+class GetSomethingHandler 
+{
+    public function handle(GetSomething $getSomething) {
+
+        return [
+            'uid' => $getSomething->getUid(),
+        ];
+    }
+
 }
 ```
 
@@ -712,8 +762,9 @@ this tag just one time.
 
 ```yaml
 Domain\QueryHandler\:
-    resource: "../../src/Domain/QueryHandler"
-    tags: ['query_handler']
+    resource: "%app_path%/src/Domain/QueryHandler/*"
+    tags:
+        - {name: "query_handler"}
 ```
 
 ## Command Bus
@@ -722,18 +773,69 @@ Use this bus for making changes to the persistence layer. In this case, CQRS
 pattern tells that Commands do **NOT** return any value, and if you return a
 Domain exception, this one should not be related to the persistence layer.
 
+
+### The Controller
 ```php
+use Domain\Command\DoSomething;
 use Drift\CommandBus\Bus\CommandBus;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-public function __execute(Request $request) {
+
+class DoSomethingController 
+{
     /* @var CommandBus $commandBus */
-    return $commandBus
-        ->execute(new DoSomething())
-        ->then(function() {
-        
-            return new Response('OK', 202);
-        });
+    private $commandBus;
+
+    public function __construct(CommandBus $commandBus)
+    {
+        $this->commandBus = $commandBus;
+    }
+
+    public function __invoke(string $uid) {
+
+        return $this->queryBus
+            ->ask(new DoSomething($uid))
+            ->then(function($something) {
+            
+                return new Response($something, 200);
+            });
+    }
+
+}
+```
+### The Command
+```php
+namespace Domain\Command;
+
+class DoSomething
+{
+    private $uid;
+
+    public function __construct(string $uid)
+    {
+        $this->uid = $uid;
+    }
+
+    public function getUid(): string
+    {
+        return $this->uid;
+    }
+
+}
+```
+###The Command Handler
+```php
+namespace Domain\CommandHandler;
+
+use Domain\Command\DoSomething;
+
+class DoSomethingHandler 
+{
+    public function handle(DoSomething $doSomething) {
+
+        return [
+            'uid' => $doSomething->getUid(),
+        ];
+    }
 }
 ```
 
@@ -752,8 +854,9 @@ this tag just one time.
 
 ```yaml
 Domain\CommandHandler\:
-    resource: "../../src/Domain/CommandHandler"
-    tags: ['command_handler']
+    resource: "../../src/Domain/CommandHandler/*"
+    tags:
+        - {name: "command_handler"}
 ```
 
 This bus can be configured as async. That means that all your commands will be
